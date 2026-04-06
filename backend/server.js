@@ -1,13 +1,24 @@
 require('dotenv').config()
 
-if (!process.env.JWT_SECRET) {
-  console.error('Set JWT_SECRET in backend/.env')
-  process.exit(1)
+function requireEnv(name, hint) {
+  const v = process.env[name]
+  if (!v || !String(v).trim()) {
+    console.error(`Missing ${name}.`)
+    console.error(hint)
+    process.exit(1)
+  }
+  return v
 }
-if (!process.env.DATABASE_URL) {
-  console.error('Set DATABASE_URL in backend/.env')
-  process.exit(1)
-}
+
+// Render / Railway / Fly inject env in the dashboard — there is no .env file on the server.
+requireEnv(
+  'JWT_SECRET',
+  'Set JWT_SECRET in your host (e.g. Render → Environment): a long random string (32+ chars).'
+)
+requireEnv(
+  'DATABASE_URL',
+  'Set DATABASE_URL to your Supabase connection string (Settings → Database → URI).'
+)
 
 const express = require('express')
 const cors = require('cors')
@@ -15,10 +26,28 @@ const pool = require('./db/pool')
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
-const origin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173'
 
-app.use(cors({ origin, credentials: true }))
+/** Comma-separated: Vercel URL + localhost for dev */
+const originRaw =
+  process.env.FRONTEND_ORIGIN ||
+  process.env.FRONTEND_URLS ||
+  'http://localhost:5173'
+const allowedOrigins = originRaw
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+)
 app.use(express.json({ limit: '2mb' }))
+
+app.get('/', (_req, res) => {
+  res.json({ ok: true, service: 'dealer-monitoring-api', docs: '/api/health' })
+})
 
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/me', require('./routes/me'))
@@ -53,15 +82,15 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`)
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API listening on port ${port}`)
   pool
     .query('SELECT current_database() AS db')
     .then(({ rows }) => {
       console.log(`PostgreSQL: connected (database: ${rows[0].db})`)
     })
     .catch((err) => {
-      console.error('PostgreSQL connection failed. Fix DATABASE_URL in backend/.env')
+      console.error('PostgreSQL connection failed. Check DATABASE_URL (Supabase URI + SSL).')
       console.error(err.message)
       console.error(
         'The API is still running — /api/health will report database status. Login needs a working database.'
