@@ -32,20 +32,48 @@ const pool = require('./db/pool')
 const app = express()
 const port = Number(process.env.PORT) || 5000
 
-/** Comma-separated: Vercel URL + localhost for dev */
+/** https:// + host, no trailing slash */
+function normalizeOriginEntry(entry) {
+  let s = String(entry || '').trim()
+  if (!s) return null
+  if (!/^https?:\/\//i.test(s)) s = `https://${s}`
+  return s.replace(/\/$/, '')
+}
+
 const originRaw =
   process.env.FRONTEND_ORIGIN ||
   process.env.FRONTEND_URLS ||
   'http://localhost:5173'
 const allowedOrigins = originRaw
   .split(',')
-  .map((s) => s.trim())
+  .map(normalizeOriginEntry)
   .filter(Boolean)
+
+/** Preview / production on Vercel (*.vercel.app). Set CORS_ALLOW_VERCEL=false to disable. */
+const vercelHttps = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i
+
+function isOriginAllowed(origin) {
+  if (!origin) return true
+  if (allowedOrigins.includes(origin)) return true
+  if (process.env.CORS_ALLOW_VERCEL !== 'false' && vercelHttps.test(origin)) {
+    return true
+  }
+  return false
+}
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin(origin, callback) {
+      if (isOriginAllowed(origin)) {
+        return callback(null, true)
+      }
+      console.warn('[cors] Blocked origin:', origin, '| allowed list:', allowedOrigins)
+      return callback(null, false)
+    },
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   })
 )
 app.use(express.json({ limit: '2mb' }))
