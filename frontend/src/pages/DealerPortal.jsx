@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { api, getToken } from '../api/client'
+import { api, apiUrl, getToken } from '../api/client'
 
 const statusLabels = {
   pending_verification: 'Pending verification',
@@ -49,7 +49,7 @@ export default function DealerPortal() {
       const body = new FormData()
       body.append('national_id', idFile)
       body.append('utility_bill', utilFile)
-      await fetch('/api/me/documents', {
+      await fetch(apiUrl('/me/documents'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${getToken()}` },
         body,

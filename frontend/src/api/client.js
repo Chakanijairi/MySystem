@@ -1,3 +1,18 @@
+/** Production: set VITE_API_URL in Vercel to your Render API origin (no trailing slash), e.g. https://xxx.onrender.com */
+function apiBase() {
+  const raw = import.meta.env.VITE_API_URL
+  if (typeof raw === 'string' && raw.trim()) {
+    return raw.replace(/\/$/, '')
+  }
+  return ''
+}
+
+/** Full URL for fetch (e.g. FormData uploads). Path like `/me/documents`. */
+export function apiUrl(path) {
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${apiBase()}/api${p}`
+}
+
 export function getToken() {
   return localStorage.getItem('token')
 }
@@ -14,12 +29,14 @@ export async function api(path, options = {}) {
   }
   const t = getToken()
   if (t) headers['Authorization'] = `Bearer ${t}`
-  const res = await fetch(`/api${path}`, { ...options, headers })
+  const base = apiBase()
+  const url = `${base}/api${path}`
+  const res = await fetch(url, { ...options, headers })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     if (res.status === 502) {
       throw new Error(
-        'Cannot reach the API (502). Start the backend: cd backend && npm run dev — or run npm run dev from the project root. If the API crashes, fix DATABASE_URL in backend/.env'
+        'Cannot reach the API (502). For production, set VITE_API_URL on Vercel to your Render backend URL.'
       )
     }
     throw new Error(data.error || res.statusText || 'Request failed')
@@ -28,7 +45,8 @@ export async function api(path, options = {}) {
 }
 
 export async function openAdminDocument(id) {
-  const res = await fetch(`/api/admin/documents/${id}/file`, {
+  const base = apiBase()
+  const res = await fetch(`${base}/api/admin/documents/${id}/file`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   })
   if (!res.ok) throw new Error('Could not open document')
