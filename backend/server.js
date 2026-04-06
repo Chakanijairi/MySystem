@@ -1,4 +1,5 @@
 require('dotenv').config()
+const crypto = require('crypto')
 
 function requireEnv(name, hint) {
   const v = process.env[name]
@@ -10,11 +11,15 @@ function requireEnv(name, hint) {
   return v
 }
 
-// Render / Railway / Fly inject env in the dashboard — there is no .env file on the server.
-requireEnv(
-  'JWT_SECRET',
-  'Set JWT_SECRET in your host (e.g. Render → Environment): a long random string (32+ chars).'
-)
+// Render often has no .env file — JWT_SECRET must be set in the dashboard for stable sessions.
+// If you forgot, we generate one so the process still starts (logins reset on every deploy / new instance).
+if (!process.env.JWT_SECRET?.trim()) {
+  process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex')
+  console.warn(
+    '[dealer-monitoring] JWT_SECRET was not set. Using a random secret for this run. Add JWT_SECRET in Render → Environment for stable logins across restarts and when scaling beyond one instance.'
+  )
+}
+
 requireEnv(
   'DATABASE_URL',
   'Set DATABASE_URL to your Supabase connection string (Settings → Database → URI).'
