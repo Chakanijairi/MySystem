@@ -1,0 +1,42 @@
+/* Full-page backdrop: soft maroon depth (no photo — keeps it simple) */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(145deg, #2d0a0a 0%, #5c1518 35%, #722f37 60%, #3d1214 100%);
+}
+
+.login-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(180, 60, 60, 0.25), transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Left info pane: maroon overlay */
+.login-info-pane {
+  background: linear-gradient(
+    160deg,
+    rgba(124, 45, 45, 0.95) 0%,
+    rgba(90, 22, 28, 0.98) 45%,
+    rgba(60, 15, 20, 0.99) 100%
+  );
+}
+
+/* Material input underline focus */
+.login-input-row:focus-within {
+  border-bottom-color: #7c2d2d;
+}
+
+.login-input-row:focus-within .login-input-icon {
+  color: #7c2d2d;
+}
