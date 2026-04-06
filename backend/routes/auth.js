@@ -82,12 +82,28 @@ router.post('/login', async (req, res) => {
     }
 
     const user = rows[0]
-    const ok = await bcrypt.compare(String(password), user.password_hash)
+    if (!user.password_hash) {
+      return res.status(401).json({ error: 'Invalid username or password' })
+    }
+
+    let ok = false
+    try {
+      ok = await bcrypt.compare(String(password), user.password_hash)
+    } catch (e) {
+      console.error('[login] bcrypt compare error', e)
+      return res.status(401).json({ error: 'Invalid username or password' })
+    }
     if (!ok) {
       return res.status(401).json({ error: 'Invalid username or password' })
     }
 
-    const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, {
+    const secret = process.env.JWT_SECRET
+    if (!secret) {
+      console.error('[login] JWT_SECRET missing at runtime')
+      return res.status(500).json({ error: 'Server misconfiguration' })
+    }
+
+    const token = jwt.sign({ sub: String(user.id) }, secret, {
       expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     })
 
@@ -104,7 +120,23 @@ router.post('/login', async (req, res) => {
       },
     })
   } catch (err) {
-    console.error(err)
+    console.error('[login]', err)
+    if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
+      return res.status(503).json({
+        error: 'Cannot reach the database. Check DATABASE_URL (Supabase) on Render.',
+      })
+    }
+    if (err.code && String(err.code).startsWith('28')) {
+      return res.status(503).json({
+        error: 'Database rejected the connection. Check DATABASE_URL password and SSL settings.',
+      })
+    }
+    if (err.code === '42P01') {
+      return res.status(503).json({
+        error:
+          'Database tables are missing. From your machine run: cd backend && npm run db:init (with DATABASE_URL pointing at Supabase).',
+      })
+    }
     return res.status(500).json({ error: 'Login failed' })
   }
 })

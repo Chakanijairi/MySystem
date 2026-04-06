@@ -2,16 +2,13 @@ require('dotenv').config()
 const fs = require('fs')
 const path = require('path')
 const bcrypt = require('bcrypt')
-const { Pool } = require('pg')
+const pool = require('./pool')
 
 async function main() {
-  const connectionString = process.env.DATABASE_URL
-  if (!connectionString) {
+  if (!process.env.DATABASE_URL?.trim()) {
     console.error('Set DATABASE_URL in backend/.env')
     process.exit(1)
   }
-
-  const pool = new Pool({ connectionString })
   const schemaPath = path.join(__dirname, 'schema.sql')
   const sql = fs.readFileSync(schemaPath, 'utf8')
 
