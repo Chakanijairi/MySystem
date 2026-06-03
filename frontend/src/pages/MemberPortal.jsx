@@ -8,7 +8,7 @@ const statusLabels = {
   suspended: 'Suspended',
 }
 
-export default function DealerPortal() {
+export default function MemberPortal() {
   const { user, logout, refresh } = useAuth()
   const [profile, setProfile] = useState(null)
   const [sales, setSales] = useState([])

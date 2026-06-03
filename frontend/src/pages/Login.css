@@ -1,42 +1,146 @@
-/* Full-page backdrop: soft maroon depth (no photo — keeps it simple) */
+/* Login page — split-card layout matching mockup */
 .login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: linear-gradient(145deg, #2d0a0a 0%, #5c1518 35%, #722f37 60%, #3d1214 100%);
+  background: linear-gradient(135deg, #fff5f5 0%, #fde2e2 100%);
 }
 
-.login-page::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(180, 60, 60, 0.25), transparent 55%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.login-page > * {
+/* Left red panel with floating hearts */
+.login-hero {
+  background: radial-gradient(circle at 30% 20%, #e83333 0%, #c40000 55%, #a30000 100%);
   position: relative;
-  z-index: 1;
+  overflow: hidden;
 }
 
-/* Left info pane: maroon overlay */
-.login-info-pane {
-  background: linear-gradient(
-    160deg,
-    rgba(124, 45, 45, 0.95) 0%,
-    rgba(90, 22, 28, 0.98) 45%,
-    rgba(60, 15, 20, 0.99) 100%
-  );
+.login-hero::before,
+.login-hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
 }
 
-/* Material input underline focus */
-.login-input-row:focus-within {
-  border-bottom-color: #7c2d2d;
+/* Soft floating bubbles to evoke the hearts background */
+.login-hero::before {
+  width: 240px;
+  height: 240px;
+  top: -60px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 70%);
 }
 
-.login-input-row:focus-within .login-input-icon {
-  color: #7c2d2d;
+.login-hero::after {
+  width: 180px;
+  height: 180px;
+  bottom: -40px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.login-heart-float {
+  position: absolute;
+  opacity: 0.55;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+}
+
+.login-heart-float.h1 {
+  top: 8%;
+  left: 8%;
+  width: 38px;
+  color: #ffffff;
+}
+.login-heart-float.h2 {
+  top: 18%;
+  right: 14%;
+  width: 28px;
+  color: #ffd166;
+}
+.login-heart-float.h3 {
+  bottom: 16%;
+  right: 8%;
+  width: 44px;
+  color: #ffffff;
+}
+.login-heart-float.h4 {
+  bottom: 8%;
+  left: 18%;
+  width: 24px;
+  color: #ffd166;
+}
+
+/* Pale pink form fields */
+.login-field {
+  background: #fde2e2;
+  border: none;
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #1f1f1f;
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.login-field::placeholder {
+  color: #9b6b6b;
+}
+
+.login-field:focus {
+  box-shadow: 0 0 0 2px rgba(209, 0, 0, 0.35);
+}
+
+.login-eye {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  color: #9b6b6b;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.login-eye:hover {
+  color: #d10000;
+}
+
+.login-submit {
+  width: 100%;
+  background: linear-gradient(180deg, #ff5252 0%, #e63232 100%);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.login-submit:hover {
+  filter: brightness(1.05);
+}
+
+.login-submit:active {
+  transform: translateY(1px);
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-link {
+  color: #d10000;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+}
+
+.login-link:hover {
+  text-decoration: underline;
 }

@@ -1,0 +1,21 @@
+/** Philippine regions — shared by admin member forms */
+export const REGION_OPTIONS = [
+  { value: '', label: '-- SELECT --' },
+  { value: 'NCR', label: 'NCR' },
+  { value: 'CAR', label: 'CAR' },
+  { value: 'Region I', label: 'Region I — Ilocos' },
+  { value: 'Region II', label: 'Region II — Cagayan Valley' },
+  { value: 'Region III', label: 'Region III — Central Luzon' },
+  { value: 'Region IV-A', label: 'Region IV-A — CALABARZON' },
+  { value: 'Region IV-B', label: 'Region IV-B — MIMAROPA' },
+  { value: 'Region V', label: 'Region V — Bicol' },
+  { value: 'Region VI', label: 'Region VI — Western Visayas' },
+  { value: 'Region VII', label: 'Region VII — Central Visayas' },
+  { value: 'Region VIII', label: 'Region VIII — Eastern Visayas' },
+  { value: 'Region IX', label: 'Region IX — Zamboanga Peninsula' },
+  { value: 'Region X', label: 'Region X — Northern Mindanao' },
+  { value: 'Region XI', label: 'Region XI — Davao' },
+  { value: 'Region XII', label: 'Region XII — SOCCSKSARGEN' },
+  { value: 'Region XIII', label: 'Region XIII — Caraga' },
+  { value: 'BARMM', label: 'BARMM' },
+]

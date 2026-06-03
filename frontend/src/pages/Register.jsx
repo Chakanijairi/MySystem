@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
+import { POSITIONS } from '../constants/positions'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -47,7 +48,7 @@ export default function Register() {
         Create account
       </h1>
       <p className="mb-8 text-sm text-zinc-400">
-        Register as a dealer. You will upload ID and utility bill after signing in.
+        Register as a member. You will upload ID and utility bill after signing in.
       </p>
       <form onSubmit={onSubmit} className="flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-xl">
         {error ? (
@@ -84,13 +85,19 @@ export default function Register() {
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-zinc-400">Category (optional)</span>
-          <input
+          <span className="text-zinc-400">Position (optional)</span>
+          <select
             value={form.member_category}
             onChange={(e) => set('member_category', e.target.value)}
-            placeholder="e.g. region or tier"
             className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-white outline-none ring-violet-500 focus:ring-2"
-          />
+          >
+            <option value="">— Select position —</option>
+            {POSITIONS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-zinc-400">Password (min 8 characters)</span>
