@@ -28,6 +28,7 @@ requireEnv(
 const express = require('express')
 const cors = require('cors')
 const pool = require('./db/pool')
+const { ensureSchema } = require('./db/ensureSchema')
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
@@ -84,6 +85,12 @@ app.get('/', (_req, res) => {
 
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/me', require('./routes/me'))
+// Mount the focused admin sub-routers BEFORE the catch-all admin router so the
+// new /admin/roles supersedes the older simple list.
+app.use('/api/admin', require('./routes/admin-roles'))
+app.use('/api/admin', require('./routes/admin-audit'))
+app.use('/api/admin', require('./routes/admin-promotions'))
+app.use('/api/admin', require('./routes/admin-settings'))
 app.use('/api/admin', require('./routes/admin'))
 
 app.get('/api/health', async (_req, res) => {
@@ -115,18 +122,30 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`API listening on port ${port}`)
-  pool
-    .query('SELECT current_database() AS db')
-    .then(({ rows }) => {
-      console.log(`PostgreSQL: connected (database: ${rows[0].db})`)
-    })
-    .catch((err) => {
-      console.error('PostgreSQL connection failed. Check DATABASE_URL (Supabase URI + SSL).')
-      console.error(err.message)
-      console.error(
-        'The API is still running — /api/health will report database status. Login needs a working database.'
-      )
-    })
-})
+async function start() {
+  if (process.env.AUTO_DB_SETUP !== 'false') {
+    try {
+      await ensureSchema()
+    } catch (err) {
+      console.error('[db] Automatic setup failed:', err.message)
+    }
+  }
+
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`API listening on port ${port}`)
+    pool
+      .query('SELECT current_database() AS db')
+      .then(({ rows }) => {
+        console.log(`PostgreSQL: connected (database: ${rows[0].db})`)
+      })
+      .catch((err) => {
+        console.error('PostgreSQL connection failed. Check DATABASE_URL (Supabase URI + SSL).')
+        console.error(err.message)
+        console.error(
+          'The API is still running — /api/health will report database status. Login needs a working database.'
+        )
+      })
+  })
+}
+
+start()
